@@ -18,14 +18,35 @@ typedef struct in_addr IN_ADDR;
 #define IP "127.0.0.1"
 #define PORT 2222
 
+SOCKET sock;
+
+void signals_handler(int signal_number)
+{
+    printf("\nSignal catched\n");
+    if(send(sock, "/EOF", strlen("/EOF"), 0) < 0)
+	{
+		perror("send()");
+		exit(errno);
+	}
+	printf("Fermeture des sockets\n");
+	close(sock);
+    exit(EXIT_SUCCESS);
+}
 
 int main(int argc, char *argv [])
 {
 	char *entree; 
 	entree = malloc(1024);   
+	
+	// signals handler
+    struct sigaction action;
+    action.sa_handler = signals_handler;
+    sigemptyset(& (action.sa_mask));
+    action.sa_flags = 0;
+    sigaction(SIGINT, & action, NULL);
 
     //connexion au serveur
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock = socket(AF_INET, SOCK_STREAM, 0);
 	if(sock == INVALID_SOCKET)
 	{
 		perror("socket()");
@@ -58,11 +79,8 @@ int main(int argc, char *argv [])
     {
 		scanf("%s",entree);
 		
-		//SOCKET sock;
 		char buffer[1024];
 		strcpy(buffer,entree);
-		printf("entree: %s\n",entree);
-		printf("buffer : %s\n",buffer);
 		if(send(sock, buffer, strlen(buffer), 0) < 0)
 		{
 			perror("send()");
@@ -71,9 +89,6 @@ int main(int argc, char *argv [])
 
 
     }
-
-    // close handlers
-    //hndclose(&hnd);
 
     exit(EXIT_SUCCESS);
 }

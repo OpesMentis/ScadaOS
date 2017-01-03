@@ -17,30 +17,30 @@ typedef struct in_addr IN_ADDR;
 #define IP "127.0.0.1"
 #define PORT 2222
 
+SOCKET sock;
+SOCKET csock;
+
+void signals_handler(int signal_number)
+{
+    printf("\nSignal catched\n");
+	printf("Fermeture des sockets\n");
+	close(sock);
+	close(csock);
+    exit(EXIT_SUCCESS);
+}
 
 int main(int argc, char *argv [])
 {
-	printf("1\n");
-	
-    // parse args
-    /*struct OPTS opts;
-    if (parse_args(argc, argv, &opts) == -1)
-        exit(EXIT_FAILURE);*/
-
-    // open handlers
-   // if (hndopen(opts, &hnd) == -1)
-    //    exit(EXIT_FAILURE);
-
     // signals handler
-    /*struct sigaction action;
+    struct sigaction action;
     action.sa_handler = signals_handler;
     sigemptyset(& (action.sa_mask));
     action.sa_flags = 0;
-    sigaction(SIGINT, & action, NULL);*/
+    sigaction(SIGINT, & action, NULL);
     
     
     //connexion au serveur
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock = socket(AF_INET, SOCK_STREAM, 0);
 	if(sock == INVALID_SOCKET)
 	{
 		perror("socket()");
@@ -68,7 +68,7 @@ int main(int argc, char *argv [])
 	}
 
 	SOCKADDR_IN csin = { 0 };
-	SOCKET csock;
+	
 
 	socklen_t sinsize = sizeof csin;
 
@@ -99,11 +99,10 @@ int main(int argc, char *argv [])
 
 		printf("%s\n",buffer);
 
-
+		if(buffer[0] == '/' && buffer[1] == 'E' && buffer[2] == 'O' &&buffer[3] == 'F'){
+			signals_handler(SIGINT);
+		}
     }
-
-    // close handlers
-    //hndclose(&hnd);
 
     exit(EXIT_SUCCESS);
 }
