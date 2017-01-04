@@ -60,13 +60,13 @@ int main(int argc, char *argv [])
                 exit(EXIT_FAILURE);
         }
     }
+	printf("string: %s\n", str);
 	
 	// copiage du pointeur en tableau pour faciliter le parcours
 	lg = strlen(str);
-	printf("string: %s\n", str);
 	strncpy(str2, str, sizeof str2 - 1);
 
-	// transformation en un tableau de char contenant . ou - (ti ou ta)
+	// transformation en un tableau de char contenant . ou - (ti ou ta) et separant les mots et lettres
 	int i;// index dans la chaine initiale
 	int ind;// index dans la chaine finale
 	char *m = (char *) calloc(6*lg, sizeof(char));// message codé 
@@ -81,21 +81,49 @@ int main(int argc, char *argv [])
 		strcat(m, "/");
 	}
 
-	char c[strlen(m)];
+	char c[strlen(m)];// tableau de char contenant . ou -
 	strncpy(c, m, sizeof c - 1);
 	printf("string : %s\n", c);
 
-	//gpioExport(gpio); // Making GPIO available
-	//gpioDirection (gpio, 1); // GPIO is set as output
-    //sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //buf is the path of the gpio's value file
-    //int fd = open(buf, O_WRONLY); // open the file
+	// TODO allumer la gpio avec le bon rythme
+	// Parametrage de la gpio
+	/* 
+	gpioExport(gpio); // Rendre la gpio disponible
+	gpioDirection (gpio, 1); // gpio en sortie
+    sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //mettre dans buf le chemin de la valeur de la gpio
+    int fd = open(buf, O_WRONLY); // ouvrir le chemin
+	write(fd, buf, 0);
+	sleep(5);
 
-	/* In a particular loop to write the gpio values*/
-		//sleep(int seconds);
-    	//write(fd, buf, 1);
+	//boucle sur le morse
+	int i;
+	for (i = 0; i < strlen(c); i++)
+	{
+		switch (c[i])
+		{
+			case '.':// ti
+    			//write(fd, buf, 1);
+				sleep(1);
+                break;
 
+			case '-':// ta
+    			//write(fd, buf, 1);
+				sleep(3);
+                break;
 
-    //close(fd);
+            case '/':// separation				
+				sleep(2);
+				break;
+
+			case '?':
+                fprintf(stderr, "Invalid option %c\n", optopt);
+                exit(EXIT_FAILURE);
+		}
+    	//write(fd, buf, 0);
+	}
+
+    //close(fd);//fermeture du fichier
+	*/
 }
 
 int gpioExport(int gpio)
