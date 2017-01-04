@@ -6,7 +6,7 @@
 #include <string.h>
 #include <fcntl.h>
 
-static const char* MORSE[128] = {
+static char* MORSE[128] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -27,10 +27,12 @@ static const char* MORSE[128] = {
 
 int main(int argc, char *argv [])
 {
-	int fd;
-	int gpio;
+	int lg;// longueur de la chaine de caractere
+	int fd;// file descriptor
+	int gpio;// numero de la gpio
 	char buf[255];
-	char* str = (char*) malloc(1024*sizeof(char));
+	char str2[1024];
+	char* str = (char*) calloc(1024, sizeof(char));
 
     // parse comand line
 	if (argc != 5)
@@ -58,12 +60,30 @@ int main(int argc, char *argv [])
                 exit(EXIT_FAILURE);
         }
     }
-
+	
+	// copiage du pointeur en tableau pour faciliter le parcours
+	lg = strlen(str);
 	printf("string: %s\n", str);
+	strncpy(str2, str, sizeof str2 - 1);
 
-	/*
-	* TODO convert str into 1/0s
-	*/
+	// transformation en un tableau de char contenant . ou - (ti ou ta)
+	int i;// index dans la chaine initiale
+	int ind;// index dans la chaine finale
+	char *m = (char *) calloc(6*lg, sizeof(char));// message codé 
+	for (i = 0; i < lg; i++)
+	{
+		int ch = str2[i];
+		if (ch != 32)
+		{
+			char *code = MORSE[ch];
+			strcat(m, code);
+		}
+		strcat(m, "/");
+	}
+
+	char c[strlen(m)];
+	strncpy(c, m, sizeof c - 1);
+	printf("string : %s\n", c);
 
 	//gpioExport(gpio); // Making GPIO available
 	//gpioDirection (gpio, 1); // GPIO is set as output
