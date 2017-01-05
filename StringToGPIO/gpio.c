@@ -37,7 +37,7 @@ int main(int argc, char *argv [])
     // parse comand line
 	if (argc != 5)
     {
-        fprintf(stderr, "Invalid usage: gpio -n gpio_number -s dispayed_string\n");
+        fprintf(stderr, "Invalid usage: gpio -n gpio_number -s displayed_string\n");
         exit(EXIT_FAILURE);
     }
 
@@ -60,39 +60,42 @@ int main(int argc, char *argv [])
                 exit(EXIT_FAILURE);
         }
     }
-	printf("string: %s\n", str);
 	
 	// copiage du pointeur en tableau pour faciliter le parcours
 	lg = strlen(str);
 	strncpy(str2, str, sizeof str2 - 1);
+	printf("\nClear Message: \n%s\n\n", str2);
 
 	// transformation en un tableau de char contenant . ou - (ti ou ta) et separant les mots et lettres
 	int i;// index dans la chaine initiale
-	int ind;// index dans la chaine finale
 	char *m = (char *) calloc(6*lg, sizeof(char));// message codé 
 	for (i = 0; i < lg; i++)
 	{
 		int ch = str2[i];
 		if (ch != 32)
-		{
+		{//pas un espace
 			char *code = MORSE[ch];
 			strcat(m, code);
 		}
-		strcat(m, "/");
+		if (i != (lg - 1))
+		{
+			strcat(m, "/");
+		}
 	}
 
-	char c[strlen(m)];// tableau de char contenant . ou -
-	strncpy(c, m, sizeof c - 1);
-	printf("string : %s\n", c);
+	char c[strlen(m) + 1];// tableau de char contenant . ou -
+	strncpy(c, m, sizeof c);
+	printf("Morse Message : \n%s\n\n", c);
+
 
 	// TODO allumer la gpio avec le bon rythme
 	// Parametrage de la gpio
 	/* 
 	gpioExport(gpio); // Rendre la gpio disponible
 	gpioDirection (gpio, 1); // gpio en sortie
-    sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //mettre dans buf le chemin de la valeur de la gpio
-    int fd = open(buf, O_WRONLY); // ouvrir le chemin
-	write(fd, buf, 0);
+	sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //mettre dans buf le chemin de la valeur de la gpio
+	int fd = open(buf, O_WRONLY); // ouvrir le fichier
+	write(fd, buf, 0);// eteindre la gpio
 	sleep(5);
 
 	//boucle sur le morse
@@ -115,8 +118,11 @@ int main(int argc, char *argv [])
 				sleep(2);
 				break;
 
+			case ' ':
+				break;
+
 			case '?':
-                fprintf(stderr, "Invalid option %c\n", optopt);
+                fprintf(stderr, "Invalid character: %c\n", c[i]);
                 exit(EXIT_FAILURE);
 		}
     	//write(fd, buf, 0);
@@ -126,15 +132,13 @@ int main(int argc, char *argv [])
 	*/
 }
 
-int gpioExport(int gpio)
+void gpioExport(int gpio)
 {
-    int fd;
     char buf[255];
-    fd = open("/sys/class/gpio/export", O_WRONLY);
-    sprintf(buf, "%d", gpio); 
+    int fd = open("/sys/class/gpio/export", O_WRONLY);
+    sprintf(buf, "%d", gpio);
     write(fd, buf, strlen(buf));
     close(fd);
-	return fd;
 }
 
 void gpioDirection(int gpio, int direction) // 1 for output, 0 for input
