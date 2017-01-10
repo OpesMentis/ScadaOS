@@ -41,6 +41,7 @@ int main(int argc, char *argv [])
         exit(EXIT_FAILURE);
     }
 
+	// Recuperation des options : str, texte entre; gpio, numero de la gpio
 	char * options = "n:s:";
     int option;
     while((option = getopt(argc, argv, options)) != -1)
