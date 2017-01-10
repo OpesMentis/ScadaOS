@@ -25,14 +25,14 @@ int main(int argc, char *argv [])
 	int lg;// longueur de la chaine de caractere
 	int fd;// file descriptor
 	int gpio;// numero de la gpio
-	char k[128]// clef optionnelle
+	char k[128];// clef optionnelle
 	char buf[255];
 	char str[1024];// texte a convertir
 
     // parse comand line
 	if (argc != 5 && argc != 7)
     {
-        fprintf(stderr, "Invalid usage. Valid usages are:\ngpio -n gpio_number -s displayed_string\ngpio -n gpio_number -s displayed_string -k key");
+        fprintf(stderr, "Invalid usage. Valid usages are:\ngpio -n gpio_number -s displayed_string\ngpio -n gpio_number -s displayed_string -k key\n");
         exit(EXIT_FAILURE);
     }
 
@@ -65,6 +65,14 @@ int main(int argc, char *argv [])
         }
     }
 	lg = strlen(str);
+	printf("\nClear Message: \n%s\n\n", str);	
+	
+	// Chiffrement si necessaire
+	if (argc == 7)
+	{
+		strncpy(str, vigenere(k, str, str), sizeof str - 1);
+		printf("Key: \n%s\n\nCoded Message: \n%s\n\n", k, str);
+	}
 
 	// transformation en un tableau de char contenant . ou - (ti ou ta) et separant les mots et lettres
 	int i;// index dans la chaine initiale
@@ -85,7 +93,8 @@ int main(int argc, char *argv [])
 
 	char c[strlen(m) + 1];// tableau de char contenant . ou -
 	strncpy(c, m, sizeof c);
-	printf("\nClear Message: \n%s\n\nMorse Message : \n%s\n\n", str, c);
+
+	printf("Morse Message : \n%s\n\n", c);
 
 
 	// TODO allumer la gpio avec le bon rythme

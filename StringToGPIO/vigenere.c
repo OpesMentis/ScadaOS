@@ -40,7 +40,5 @@ char* vigenere(char *keyParam, char *strParam, char* ret)
 	}
 	ret = m;
 
-	printf("\nClear Message: \n%s\n\nKey: \n%s\n\nCoded Message: \n%s\n\n", str, k, m);
-
 	return ret;
 }
