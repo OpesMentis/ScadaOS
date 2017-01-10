@@ -25,18 +25,23 @@ int main(int argc, char *argv [])
 	int lg;// longueur de la chaine de caractere
 	int fd;// file descriptor
 	int gpio;// numero de la gpio
+	char k[128]// clef optionnelle
 	char buf[255];
-	char str[1024];
+	char str[1024];// texte a convertir
 
     // parse comand line
-	if (argc != 5)
+	if (argc != 5 && argc != 7)
     {
-        fprintf(stderr, "Invalid usage: gpio -n gpio_number -s displayed_string\n");
+        fprintf(stderr, "Invalid usage. Valid usages are:\ngpio -n gpio_number -s displayed_string\ngpio -n gpio_number -s displayed_string -k key");
         exit(EXIT_FAILURE);
     }
 
 	// Recuperation des options : str, texte entre; gpio, numero de la gpio
-	char * options = "n:s:";
+	char* options = "n:s:";
+	if (argc == 7)
+	{
+		options = "n:s:k:";
+	}
     int option;
     while((option = getopt(argc, argv, options)) != -1)
     {
@@ -48,6 +53,10 @@ int main(int argc, char *argv [])
 
 			case 's':
 				strncpy(str, optarg, sizeof str - 1);
+                break;
+
+			case 'k':
+				strncpy(k, optarg, sizeof k - 1);
                 break;
 
             case '?':

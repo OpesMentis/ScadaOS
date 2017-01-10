@@ -13,7 +13,7 @@ int main(int argc, char *argv [])
     // parse comand line
 	if (argc != 5)
     {
-        fprintf(stderr, "Invalid usage: vigenere -k key -s displayed_string\n");
+        fprintf(stderr, "Invalid usage: \nvigenere -k key -s displayed_string\n");
         exit(EXIT_FAILURE);
     }
 
