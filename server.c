@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <fcntl.h>
 
 typedef int SOCKET;
 typedef struct sockaddr_in SOCKADDR_IN;
@@ -38,6 +39,34 @@ static char* MORSE[128] = {
         ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--",
         "-..-", "-.--", "--..", NULL, NULL, NULL, NULL, NULL,
 };
+
+
+void gpioExport(int gpio)
+{
+    char buf[255];
+    int fd = open("/sys/class/gpio/export", O_WRONLY);
+    sprintf(buf, "%d", gpio);
+    write(fd, buf, strlen(buf));
+    close(fd);
+}
+
+void gpioDirection(int gpio, int direction) // 1 for output, 0 for input
+{
+	char buf[255];
+    sprintf(buf, "/sys/class/gpio/gpio%d/direction", gpio);
+    int fd = open(buf, O_WRONLY);
+
+    if (direction)
+    {
+        write(fd, "out", 3);
+    }
+    else
+    {
+        write(fd, "in", 2);
+    }
+    close(fd);
+}
+
 
 void signals_handler(int signal_number)
 {
@@ -153,6 +182,44 @@ int main(int argc, char *argv [])
 	strncpy(c, m, sizeof c);
 	printf("Morse Message : \n%s\n\n", c);
 
+	gpioExport(gpio); // Rendre la gpio disponible
+	gpioDirection (gpio, 1); // gpio en sortie
+	sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //mettre dans buf le chemin de la valeur de la gpio
+	int fd = open(buf, O_WRONLY); // ouvrir le fichier
+	write(fd, buf, 0);// eteindre la gpio
+	sleep(5);
+
+	//boucle sur le morse
+	int k;
+	for (k = 0; k < strlen(c); k++)
+	{
+		switch (c[k])
+		{
+			case '.':// ti
+    			write(fd, buf, 1);
+				sleep(1);
+                break;
+
+			case '-':// ta
+    			write(fd, buf, 1);
+				sleep(3);
+                break;
+
+            case '/':// separation				
+				sleep(2);
+				break;
+
+			case ' ':
+				break;
+
+			case '?':
+                fprintf(stderr, "Invalid character: %c\n", c[i]);
+                exit(EXIT_FAILURE);
+		}
+    	write(fd, buf, 0);
+	}
+
+
 		if(buffer[0] == '/' && buffer[1] == 'E' && buffer[2] == 'O' &&buffer[3] == 'F'){
 			signals_handler(SIGINT);
 		}
@@ -160,3 +227,4 @@ int main(int argc, char *argv [])
 
     exit(EXIT_SUCCESS);
 }
+
