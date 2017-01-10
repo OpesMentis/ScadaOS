@@ -1,10 +1,5 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
 #include <fcntl.h>
+#include "vigenere.h"
 
 static char* MORSE[128] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -31,8 +26,7 @@ int main(int argc, char *argv [])
 	int fd;// file descriptor
 	int gpio;// numero de la gpio
 	char buf[255];
-	char str2[1024];
-	char* str = (char*) calloc(1024, sizeof(char));
+	char str[1024];
 
     // parse comand line
 	if (argc != 5)
@@ -52,7 +46,7 @@ int main(int argc, char *argv [])
                 break;
 
 			case 's':
-                str = optarg;
+				strncpy(str, optarg, sizeof str - 1);
                 break;
 
             case '?':
@@ -60,18 +54,14 @@ int main(int argc, char *argv [])
                 exit(EXIT_FAILURE);
         }
     }
-	
-	// copiage du pointeur en tableau pour faciliter le parcours
 	lg = strlen(str);
-	strncpy(str2, str, sizeof str2 - 1);
-	printf("\nClear Message: \n%s\n\n", str2);
 
 	// transformation en un tableau de char contenant . ou - (ti ou ta) et separant les mots et lettres
 	int i;// index dans la chaine initiale
 	char *m = (char *) calloc(6*lg, sizeof(char));// message codé 
 	for (i = 0; i < lg; i++)
 	{
-		int ch = str2[i];
+		int ch = str[i];
 		if (ch != 32)
 		{//pas un espace
 			char *code = MORSE[ch];
@@ -85,7 +75,7 @@ int main(int argc, char *argv [])
 
 	char c[strlen(m) + 1];// tableau de char contenant . ou -
 	strncpy(c, m, sizeof c);
-	printf("Morse Message : \n%s\n\n", c);
+	printf("\nClear Message: \n%s\n\nMorse Message : \n%s\n\n", str, c);
 
 
 	// TODO allumer la gpio avec le bon rythme
