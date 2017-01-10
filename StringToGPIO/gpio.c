@@ -121,6 +121,8 @@ int main(int argc, char *argv [])
 
     //close(fd);//fermeture du fichier
 	*/
+
+	return EXIT_SUCCESS;
 }
 
 void gpioExport(int gpio)
