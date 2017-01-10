@@ -87,8 +87,13 @@ int main(int argc, char *argv [])
 			exit(errno);
 		}
 
-
+	if(buffer[0] == '/' && buffer[1] == 'E' && buffer[2] == 'O' &&buffer[3] == 'F')
+		{
+			signals_handler(SIGINT);
+		}
     }
 
     exit(EXIT_SUCCESS);
 }
+
+
