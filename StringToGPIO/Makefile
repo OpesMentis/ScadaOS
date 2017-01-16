@@ -15,8 +15,12 @@ gpio: gpio.o vigenere.o
 vigenere_exec:
 	gcc vigenere_exec.c -o vigenere_exec
 
+test:
+	gcc test.c -o test_prog
+
 clean:
-	rm vigenere_exec gpio gpio.o vigenere.o
+	rm vigenere_exec gpio gpio.o vigenere.o test_prog
+
 	
 
 
