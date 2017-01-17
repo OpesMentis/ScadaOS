@@ -40,6 +40,51 @@ static char* MORSE[128] = {
         "-..-", "-.--", "--..", NULL, NULL, NULL, NULL, NULL,
 };
 
+char* unvigenere(char* recv, char* ret)
+{
+	int lg = strlen(recv);
+	char received[lg];
+	strcpy(received, recv);
+    char k[] = "keyabcd";// only smaller cases letters
+	//dechiffrement vigenere
+	int i;// index dans la chaine initiale
+	char m[lg];// message codé 
+	for (i = 0; i < lg; i++)
+	{
+		int ch = received[i];
+		int key = k[i%strlen(k)] - 97;
+
+		if (97 <= ch && ch <= 122)
+		{// lettre minuscule
+			int c = (ch - 97 - key)%26;
+			if (c < 0) {
+				c += 26;
+			}
+			m[i] = (char) (97 + c);
+		} else if (65 <= ch && ch <= 90)
+		{// lettre majuscule
+			int c = (ch - 65 - key)%26;
+			if (c < 0) {
+				c += 26;
+			}
+			m[i] = (char) (65 + c);
+		} else if (48 <= ch && ch <= 57)
+		{// chiffre
+			int c = (ch - 48 - key)%26;
+			if (c < 0) {
+				c += 30;
+			}
+			m[i] = (char) (48 + c%10);
+		} else
+		{
+			m[i] = received[i];
+		}
+	}
+	printf("vig %s\n", m);
+	ret = m;
+	return ret;
+}
+
 
 void gpioExport(int gpio)
 {
@@ -80,12 +125,9 @@ void signals_handler(int signal_number)
 int main(int argc, char *argv [])
 {
 
-	int lg;// longueur de la chaine de caractere
-	int fd;// file descriptor
 	int gpio=1;// numero de la gpio
 	char buf[255];
 	char str2[1024];
-	char* str = (char*) calloc(1024, sizeof(char));
 
     // signals handler
     struct sigaction action;
@@ -138,27 +180,26 @@ int main(int argc, char *argv [])
 
     while(1)
     {
-		
-
 		char buffer[1024];
 		int n = 0;
 
-		
-
-		if((n = recv(csock, buffer, sizeof buffer - 1, 0)) < 0)
+		if((n = recv(csock, buffer, sizeof buffer, 0)) < 0)
 		{
 			perror("recv()");
 			exit(errno);
 		}
-
+		
 		buffer[n] = '\0';
-
-		printf("%s\n",buffer);
+		printf("\nReceived Message: \n%s\n\n", buffer);
+		
+		// dechiffrement
+		char* clear = (char*) calloc(n, sizeof(char));
+		clear = unvigenere(buffer, clear);
+		printf("\nClear Message: \n%s\n\n", clear);
 
 		// copiage du pointeur en tableau pour faciliter le parcours
-		lg = strlen(buffer);
-		strncpy(str2, buffer, sizeof str2 - 1);
-		printf("\nClear Message: \n%s\n\n", str2);
+		int lg = strlen(clear);
+		strncpy(str2, clear, sizeof str2 - 1);
 
 		// transformation en un tableau de char contenant . ou - (ti ou ta) et separant les mots et lettres
 		int i;// index dans la chaine initiale
@@ -172,59 +213,58 @@ int main(int argc, char *argv [])
 				strcat(m, code);
 			}
 
-		if (i != (lg - 1))
-		{
-			strcat(m, "/");
+			if (i != (lg - 1))
+			{
+				strcat(m, "/");
+			}
 		}
-	}
 
-	char c[strlen(m) + 1];// tableau de char contenant . ou -
-	strncpy(c, m, sizeof c);
-	printf("Morse Message : \n%s\n\n", c);
+		char c[strlen(m) + 1];// tableau de char contenant . ou -
+		strncpy(c, m, sizeof c);
+		printf("Morse Message : \n%s\n\n", c);
 
-	gpioExport(gpio); // Rendre la gpio disponible
-	gpioDirection (gpio, 1); // gpio en sortie
-	sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //mettre dans buf le chemin de la valeur de la gpio
-	int fd = open(buf, O_WRONLY); // ouvrir le fichier
-	write(fd, buf, 0);// eteindre la gpio
-	sleep(5);
+		gpioExport(gpio); // Rendre la gpio disponible
+		gpioDirection (gpio, 1); // gpio en sortie
+		sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //mettre dans buf le chemin de la valeur de la gpio
+		int fd = open(buf, O_WRONLY); // ouvrir le fichier
+		write(fd, buf, 0);// eteindre la gpio
+		sleep(5);
 
-	//boucle sur le morse
-	int k;
-	for (k = 0; k < strlen(c); k++)
-	{
-		switch (c[k])
+		//boucle sur le morse
+		int k;
+		for (k = 0; k < strlen(c); k++)
 		{
-			case '.':// ti
-    			write(fd, buf, 1);
-				sleep(1);
-                break;
+			switch (c[k])
+			{
+				case '.':// ti
+    				write(fd, buf, 1);
+					sleep(1);
+    	            break;
+	
+				case '-':// ta
+    				write(fd, buf, 1);
+					sleep(3);
+    	            break;
 
-			case '-':// ta
-    			write(fd, buf, 1);
-				sleep(3);
-                break;
+    	        case '/':// separation				
+					sleep(2);
+					break;
 
-            case '/':// separation				
-				sleep(2);
-				break;
-
-			case ' ':
-				break;
-
-			case '?':
-                fprintf(stderr, "Invalid character: %c\n", c[i]);
-                exit(EXIT_FAILURE);
+				case ' ':
+					break;
+	
+				case '?':
+    	            fprintf(stderr, "Invalid character: %c\n", c[i]);
+    	            exit(EXIT_FAILURE);
+			}
+    		write(fd, buf, 0);
 		}
-    	write(fd, buf, 0);
-	}
 
-
-		if(buffer[0] == '/' && buffer[1] == 'E' && buffer[2] == 'O' &&buffer[3] == 'F'){
+		if(buffer[0] == '/' && buffer[1] == 'E' && buffer[2] == 'O' &&buffer[3] == 'F')
+		{
 			signals_handler(SIGINT);
 		}
     }
 
     exit(EXIT_SUCCESS);
 }
-

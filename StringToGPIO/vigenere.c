@@ -17,7 +17,7 @@ char* vigenere(char *keyParam, char *strParam, char* ret)
 	strncpy(str, strParam, sizeof str -1);
 	lg = strlen(str);
 
-	//chiffrement cesar
+	//chiffrement vigenere
 	int i;// index dans la chaine initiale
 	char m[lg];// message codé 
 	for (i = 0; i < lg; i++)
