@@ -225,7 +225,7 @@ int main(int argc, char *argv [])
 		strcpy(c, m);
 		printf("Morse Message : \n%s\n\n", c);
 
-		/*gpioExport(gpio); // Rendre la gpio disponible
+		gpioExport(gpio); // Rendre la gpio disponible
 		gpioDirection (gpio, 1); // gpio en sortie
 		sprintf(buf, "/sys/class/gpio/gpio%d/value", gpio); //mettre dans buf le chemin de la valeur de la gpio
 		int fd = open(buf, O_WRONLY); // ouvrir le fichier
@@ -260,7 +260,7 @@ int main(int argc, char *argv [])
 				exit(EXIT_FAILURE);
 			}
     		write(fd, buf, 0);
-		}*/
+		}
 	}
 	exit(EXIT_SUCCESS);
 }
