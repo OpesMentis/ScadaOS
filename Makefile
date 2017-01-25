@@ -5,3 +5,6 @@ client: client.c
 
 server: server.c
 	gcc -Wall -Wfatal-errors server.c -o server
+
+clean :
+	rm server client

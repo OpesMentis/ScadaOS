@@ -37,6 +37,7 @@ char* vigenere(char* entree, char* ret)
 	int lg = strlen(entree);
     char k[] = "keyabcd";// only smaller cases
 	char m[lg];
+	
 	strcpy(m, entree);
 	//chiffrement vigenere
 	int i;// index dans la chaine initiale
@@ -60,6 +61,7 @@ char* vigenere(char* entree, char* ret)
 			mc[i] = m[i];
 		}
 	}
+	mc[lg] = '\0';
 	ret = mc;
 	return ret;
 }
@@ -143,7 +145,7 @@ int main(int argc, char *argv [])
 		char* cipher = (char*) calloc(strlen(entree), sizeof(char));
 		// chiffrement
 		cipher = vigenere(entree, cipher);
-		char buffer[1024];
+		char buffer[strlen(entree)];
 		strcpy(buffer, cipher);
 		printf("\nClear Message:\n%s\n\nEncoded Message:\n%s\n\n", entree, buffer);
 
