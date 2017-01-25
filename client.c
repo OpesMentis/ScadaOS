@@ -21,21 +21,21 @@ SOCKET sock;
 
 void signals_handler(int signal_number)
 {
-    printf("\nSignal catched\n");
-    if(send(sock, "/EOF", strlen("/EOF"), 0) < 0)
+	printf("\nSignal catched\n");
+	if(send(sock, "/EOF", strlen("/EOF"), 0) < 0)
 	{
 		perror("send()");
 		exit(errno);
 	}
 	printf("Fermeture des sockets\n");
 	close(sock);
-    exit(EXIT_SUCCESS);
+	exit(EXIT_SUCCESS);
 }
 
 char* vigenere(char* entree, char* ret)
 {
 	int lg = strlen(entree);
-    char k[] = "keyabcd";// only smaller cases
+	char k[] = "keyabcd";// only smaller cases
 	char m[lg];
 	
 	strcpy(m, entree);
@@ -74,42 +74,44 @@ int main(int argc, char *argv [])
 	
 	// parse comand line
 	if (argc != 3)
-    {
-        fprintf(stderr, "Invalid usage. Valid usages is:\nclient -a server_ip\n");
-        exit(EXIT_FAILURE);
-    }
+	{
+		fprintf(stderr, "Invalid usage. Valid usages is:\nclient -a server_ip\n");
+		exit(EXIT_FAILURE);
+	}
 
 	// Recuperation des options : str, texte entre; gpio, numero de la gpio
 	char* options = "a:";
-    int option;
-    while((option = getopt(argc, argv, options)) != -1)
-    {
-        switch(option)
-        {
-            case 'a':
-				if (strlen(optarg) > 15) {
-                	printf("The ip address seems to be too long\n");
-                	exit(EXIT_FAILURE);
-				} else {
-                	ip = optarg;
-				}
-                break;
+	int option;
+	while((option = getopt(argc, argv, options)) != -1)
+	{
+		switch(option)
+		{
+			case 'a':
+			if (strlen(optarg) > 15)
+			{
+			printf("The ip address seems to be too long\n");
+			exit(EXIT_FAILURE);
+			} else
+			{
+				ip = optarg;
+			}
+			break;
 
-            case '?':
-                fprintf(stderr, "Invalid option %c\n", optopt);
-                exit(EXIT_FAILURE);
-        }
-    }   
+			case '?':
+			fprintf(stderr, "Invalid option %c\n", optopt);
+			exit(EXIT_FAILURE);
+		}
+	}   
 	
 	// signals handler
-    struct sigaction action;
-    action.sa_handler = signals_handler;
-    sigemptyset(& (action.sa_mask));
-    action.sa_flags = 0;
-    sigaction(SIGINT, & action, NULL);
+	struct sigaction action;
+	action.sa_handler = signals_handler;
+	sigemptyset(& (action.sa_mask));
+	action.sa_flags = 0;
+	sigaction(SIGINT, & action, NULL);
 
-    //connexion au serveur
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+	//connexion au serveur
+	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if(sock == INVALID_SOCKET)
 	{
 		perror("socket()");
@@ -138,8 +140,8 @@ int main(int argc, char *argv [])
 	}
 
 
-    while(1)
-    {
+	while(1)
+	{
 		fgets(entree, 1024, stdin);
 		
 		char* cipher = (char*) calloc(strlen(entree), sizeof(char));
@@ -159,10 +161,8 @@ int main(int argc, char *argv [])
 		{
 			signals_handler(SIGINT);
 		}
-    }
+	}
 
 	free(ip);
-    exit(EXIT_SUCCESS);
+	exit(EXIT_SUCCESS);
 }
-
-
